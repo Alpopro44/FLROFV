@@ -1,0 +1,212 @@
+<Window x:Class="TodoListApp.Views.UserManagementWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TodoListApp.Views"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:TodoListApp.Converters"
+        mc:Ignorable="d"
+        Title="Kullanıcı Yönetimi" Height="650" Width="950"
+        WindowStartupLocation="CenterScreen"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+    
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility"/>
+        
+        <!-- DataGrid Header Style -->
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="Background" Value="{DynamicResource PrimaryHueLightBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueMidForegroundBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+        
+        <!-- DataGrid Cell Style -->
+        <Style x:Key="DataGridCellStyle" TargetType="{x:Type DataGridCell}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                        <Border Padding="{TemplateBinding Padding}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <TextBlock Grid.Row="0" 
+                   Text="Kullanıcı Yönetimi" 
+                   Style="{StaticResource MaterialDesignHeadline5TextBlock}"
+                   Margin="0,0,0,20"/>
+        
+        <!-- User List -->
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Users}"
+                  SelectedItem="{Binding SelectedUser}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  IsReadOnly="True"
+                  Margin="0,0,0,20"
+                  FontSize="14"
+                  RowHeight="50"
+                  HeadersVisibility="Column"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Auto"
+                  Background="White"
+                  BorderThickness="1"
+                  BorderBrush="{DynamicResource MaterialDesignDivider}"
+                  ColumnHeaderHeight="40"
+                  GridLinesVisibility="Horizontal"
+                  HorizontalGridLinesBrush="{DynamicResource MaterialDesignDivider}"
+                  VerticalGridLinesBrush="{DynamicResource MaterialDesignDivider}"
+                  ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
+                  CellStyle="{StaticResource DataGridCellStyle}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="60"/>
+                <DataGridTextColumn Header="Kullanıcı Adı" Binding="{Binding Username}" Width="180"/>
+                <DataGridTextColumn Header="E-posta" Binding="{Binding Email}" Width="250"/>
+                <DataGridTextColumn Header="Kayıt Tarihi" Binding="{Binding CreatedAt, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" Width="170"/>
+                <DataGridTemplateColumn Header="Yetki" Width="120">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Role, Converter={StaticResource UserRoleToStringConverter}}" 
+                                       VerticalAlignment="Center"
+                                       Margin="5,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="İşlemler" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="5,0">
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" 
+                                        Command="{Binding DataContext.EditUserCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip="Düzenle"
+                                        Width="40" 
+                                        Height="40" 
+                                        Padding="5">
+                                    <materialDesign:PackIcon Kind="Pencil" 
+                                                            Width="24" 
+                                                            Height="24" 
+                                                            HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"/>
+                                </Button>
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" 
+                                        Command="{Binding DataContext.DeleteUserCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip="Sil"
+                                        Width="40" 
+                                        Height="40" 
+                                        Padding="5"
+                                        Margin="5,0,0,0">
+                                    <materialDesign:PackIcon Kind="Delete" 
+                                                            Width="24" 
+                                                            Height="24" 
+                                                            HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center"/>
+                                </Button>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        
+        <!-- Edit User Panel -->
+        <Grid Grid.Row="1" 
+              Visibility="{Binding IsEditMode, Converter={StaticResource BooleanToVisibility}}"
+              Background="{DynamicResource MaterialDesignPaper}">
+            <materialDesign:Card Padding="24" 
+                                VerticalAlignment="Center" 
+                                MaxHeight="550" 
+                                MaxWidth="700" 
+                                Margin="20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="{Binding EditUserTitle}"
+                                Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                Margin="0,0,0,20"/>
+
+                        <TextBox Text="{Binding EditUsername}"
+                                materialDesign:HintAssist.Hint="Kullanıcı Adı"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                Margin="0,0,0,20"
+                                FontSize="14"/>
+
+                        <TextBox Text="{Binding EditEmail}"
+                                materialDesign:HintAssist.Hint="E-posta"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                Margin="0,0,0,20"
+                                FontSize="14"/>
+                        
+                        <PasswordBox x:Name="passwordBox"
+                                    materialDesign:HintAssist.Hint="Şifre (boş bırakılırsa değiştirilmez)"
+                                    Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                                    Margin="0,0,0,20"
+                                    FontSize="14"/>
+
+                        <ComboBox ItemsSource="{Binding UserRoles}"
+                                SelectedItem="{Binding EditUserRole}"
+                                materialDesign:HintAssist.Hint="Yetki"
+                                Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                Margin="0,0,0,30"
+                                FontSize="14"/>
+
+                        <StackPanel Orientation="Horizontal" 
+                                HorizontalAlignment="Right"
+                                Margin="0,10,0,0">
+                            <Button Content="İptal"
+                                    Command="{Binding CancelEditCommand}"
+                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Margin="0,0,16,0"
+                                    Height="40"
+                                    Width="100"/>
+                            <Button Content="Kaydet"
+                                    Command="{Binding SaveUserCommand}"
+                                    CommandParameter="{Binding ElementName=passwordBox}"
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Height="40"
+                                    Width="100"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </materialDesign:Card>
+        </Grid>
+        
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="Yeni Kullanıcı"
+                    Command="{Binding AddUserCommand}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    Height="45"
+                    Width="150"
+                    FontSize="14"/>
+        </StackPanel>
+    </Grid>
+</Window> 

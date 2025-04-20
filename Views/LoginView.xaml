@@ -1,0 +1,89 @@
+<Window x:Class="TodoListApp.Views.LoginView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:TodoListApp.Views"
+        mc:Ignorable="d"
+        Title="Giriş" 
+        Height="631" 
+        Width="400"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <Grid Margin="0,0,0,-55">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Başlık -->
+        <materialDesign:Card Grid.Row="0" 
+                            Background="{DynamicResource PrimaryHueMidBrush}" 
+                            Padding="20,30"
+                            UniformCornerRadius="0">
+            <StackPanel>
+                <materialDesign:PackIcon Kind="AccountCircle"
+                                       Height="64"
+                                       Width="64"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center"/>
+                <TextBlock Text="FavLists Giriş"
+                         Foreground="White"
+                         FontSize="24"
+                         FontWeight="Medium"
+                         HorizontalAlignment="Center"
+                         Margin="0,16,0,0"/>
+            </StackPanel>
+        </materialDesign:Card>
+
+        <!-- Giriş Formu -->
+        <materialDesign:Card Grid.Row="1" 
+                            Margin="32,32,32,0" 
+                            VerticalAlignment="Top"
+                            Padding="16">
+            <StackPanel>
+                <TextBox x:Name="UsernameTextBox"
+                        Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                        materialDesign:HintAssist.Hint="Kullanıcı Adı"
+                        materialDesign:TextFieldAssist.HasClearButton="True"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        Margin="0,0,0,16"/>
+
+                <PasswordBox x:Name="PasswordBox"
+                           materialDesign:HintAssist.Hint="Şifre"
+                           materialDesign:TextFieldAssist.HasClearButton="True"
+                           Style="{StaticResource MaterialDesignOutlinedPasswordBox}"
+                           Margin="0,0,0,24"/>
+
+                <Button Content="GİRİŞ YAP"
+                        Click="Login_Click"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Height="45"
+                        materialDesign:ButtonAssist.CornerRadius="8"/>
+
+                <Button Content="KAYIT OL"
+                        VerticalContentAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        Click="Register_Click"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Margin="0,8,0,0"
+                        Height="45"/>
+
+                <Button Content="ÇIKIŞ"
+                        Click="Exit_Click"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Margin="0,8,0,0"
+                        Height="45"/>
+            </StackPanel>
+        </materialDesign:Card>
+    </Grid>
+</Window> 

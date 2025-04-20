@@ -1,0 +1,787 @@
+<Window x:Class="TodoListApp.Views.ReportsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TodoListApp.Views"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        mc:Ignorable="d"
+        Title="FavLists - Görev Raporları" 
+        Height="650" 
+        Width="1000"
+        WindowStartupLocation="CenterScreen"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+    
+    <Window.Resources>
+        <Style x:Key="TabButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="16,0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,4"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="0"/>
+            <Setter Property="materialDesign:RippleAssist.Feedback" Value="#8CFFFFFF"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#2050B0"/>
+                    <Setter Property="BorderBrush" Value="#90CAF9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="ActiveTabButtonStyle" TargetType="Button" BasedOn="{StaticResource TabButtonStyle}">
+            <Setter Property="Background" Value="#1565C0"/>
+            <Setter Property="BorderBrush" Value="#90CAF9"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Başlık Çubuğu -->
+        <Border Background="#1976D2" Height="70">
+            <DockPanel LastChildFill="True">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="16,0,0,0">
+                    <materialDesign:PackIcon Kind="ChartBar" 
+                                           Width="32" 
+                                           Height="32" 
+                                           VerticalAlignment="Center" 
+                                           Foreground="White"/>
+                    <TextBlock Text="FavLists Görev Analizi" 
+                             FontSize="24" 
+                             FontWeight="Bold" 
+                             VerticalAlignment="Center" 
+                             Foreground="White" 
+                             Margin="12,0,0,0"/>
+                </StackPanel>
+                
+                <Button DockPanel.Dock="Right" 
+                      Style="{StaticResource MaterialDesignIconForegroundButton}" 
+                      Foreground="White"
+                      Click="CloseWindow_Click"
+                      Margin="0,0,16,0"
+                      ToolTip="Rapor penceresini kapat">
+                        <materialDesign:PackIcon Kind="Close" 
+                                               Width="24" 
+                                           Height="24"/>
+                </Button>
+            </DockPanel>
+        </Border>
+        
+        <!-- Sekmeler / Butonlar -->
+        <Border Grid.Row="1" Background="#0D47A1" Height="60">
+            <Grid>
+                <UniformGrid Columns="3" HorizontalAlignment="Center">
+                    <Button x:Name="GeneralReportsButton" 
+                          Content="Genel Dashboard" 
+                          Style="{StaticResource ActiveTabButtonStyle}"
+                          Click="GeneralReports_Click">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ViewDashboard" Width="24" Height="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    
+                    <Button x:Name="UserReportsButton" 
+                          Content="Kullanıcı Analizleri" 
+                          Style="{StaticResource TabButtonStyle}"
+                          Click="UserReports_Click">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="AccountGroup" Width="24" Height="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                    
+                    <Button x:Name="CategoryReportsButton" 
+                          Content="Kategori İstatistikleri" 
+                          Style="{StaticResource TabButtonStyle}"
+                          Click="CategoryReports_Click">
+                        <Button.ContentTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ChartPie" Width="24" Height="24" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </Button.ContentTemplate>
+                    </Button>
+                </UniformGrid>
+            </Grid>
+        </Border>
+        
+        <!-- İçerik Alanı -->
+        <Grid Grid.Row="2">
+            <!-- İçerik Panelleri -->
+            <Grid x:Name="GeneralReportsPanel" Visibility="Visible">
+                <!-- Ana İçerik -->
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Kullanıcı Seçimi ve Arama -->
+                    <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Kullanıcı Seçimi" 
+                                         FontWeight="Bold" 
+                                         Foreground="#1976D2"
+                                         Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <ComboBox x:Name="UserSelectionComboBox"
+                                            materialDesign:HintAssist.Hint="Kullanıcı seçin"
+                                            Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                            DisplayMemberPath="Username"
+                                            SelectedValuePath="Id"
+                                            SelectionChanged="UserSelection_Changed">
+                                        <ComboBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ComboBox.ItemsPanel>
+                                    </ComboBox>
+                                    
+                                    <Button Grid.Column="1"
+                                          Content="Tüm Kullanıcılar"
+                                          Style="{StaticResource MaterialDesignOutlinedButton}"
+                                          BorderBrush="#1976D2"
+                                          Foreground="#1976D2"
+                                          Margin="16,0,0,0"
+                                          Click="AllUsers_Click"/>
+                                </Grid>
+                            </StackPanel>
+                            
+                            <StackPanel Grid.Column="1" Margin="16,0,0,0">
+                                <TextBlock Text="Kullanıcı Arama" 
+                                         FontWeight="Bold" 
+                                         Foreground="#1976D2"
+                                         Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <TextBox x:Name="UserSearchTextBox"
+                                           materialDesign:HintAssist.Hint="Kullanıcı adı girin"
+                                           Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                           Width="200"/>
+                                    
+                                    <Button Grid.Column="1"
+                                          Style="{StaticResource MaterialDesignFlatButton}"
+                                          Foreground="#1976D2"
+                                          Margin="8,0,0,0"
+                                          Click="SearchUser_Click">
+                                        <materialDesign:PackIcon Kind="Magnify" Height="24" Width="24"/>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </materialDesign:Card>
+                    
+                    <!-- Görev Tamamlama İstatistikleri -->
+                    <materialDesign:Card Grid.Row="1" Padding="16" UniformCornerRadius="8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Başlık ve Kullanıcı Bilgisi -->
+                            <TextBlock x:Name="ReportTitleTextBlock"
+                                     Grid.Row="0"
+                                     Text="Kullanıcı Görev İstatistikleri"
+                                     FontSize="18"
+                                     FontWeight="Bold"
+                                     Foreground="#1976D2"
+                                     Margin="0,0,0,16"/>
+                            
+                            <!-- Özet Bilgileri -->
+                            <Grid Grid.Row="1" Margin="0,0,0,24">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- Toplam Görev -->
+                                <materialDesign:Card Grid.Column="0" 
+                                                  Background="White" 
+                                                  UniformCornerRadius="8"
+                                      Padding="16" 
+                                      Margin="0,0,8,0">
+                                    <StackPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <materialDesign:PackIcon Kind="FormatListBulleted" 
+                                                                   Width="28" 
+                                                                   Height="28" 
+                                                                   DockPanel.Dock="Left"
+                                                                   Foreground="#1976D2"/>
+                                            <Border DockPanel.Dock="Right" 
+                                                  Background="#E3F2FD" 
+                                                  CornerRadius="20" 
+                                                  Width="40" 
+                                                  Height="40">
+                                                <TextBlock x:Name="TotalTasksTextBlock" 
+                                                         Text="0" 
+                                                         FontSize="18" 
+                                                         FontWeight="Bold" 
+                                                         Foreground="#1976D2"
+                                                         VerticalAlignment="Center"
+                                                         HorizontalAlignment="Center"/>
+                                            </Border>
+                                        </DockPanel>
+                                        <TextBlock Text="Toplam Görev" 
+                                                 FontWeight="Medium"
+                                                 Margin="0,12,0,0"/>
+                                        <TextBlock Text="Sistemdeki tüm görevlerin sayısı"
+                                                 FontSize="12"
+                                                 Opacity="0.6"
+                                                 TextWrapping="Wrap"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+                                
+                                <!-- Tamamlanan Görevler -->
+                                <materialDesign:Card Grid.Column="1" 
+                                                  Background="White" 
+                                                  UniformCornerRadius="8"
+                                      Padding="16" 
+                                      Margin="8,0,8,0">
+                                    <StackPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <materialDesign:PackIcon Kind="CheckboxMarkedCircleOutline" 
+                                                                   Width="28" 
+                                                                   Height="28" 
+                                                                   DockPanel.Dock="Left"
+                                                                   Foreground="#4CAF50"/>
+                                            <Border DockPanel.Dock="Right" 
+                                                  Background="#E8F5E9" 
+                                                  CornerRadius="20" 
+                                                  Width="40" 
+                                                  Height="40">
+                                                <TextBlock x:Name="CompletedTasksTextBlock" 
+                                                         Text="0" 
+                                                         FontSize="18" 
+                                                         FontWeight="Bold" 
+                                                         Foreground="#4CAF50"
+                                                         VerticalAlignment="Center"
+                                                         HorizontalAlignment="Center"/>
+                                            </Border>
+                                        </DockPanel>
+                                        <TextBlock Text="Tamamlanan" 
+                                                 FontWeight="Medium"
+                                                 Margin="0,12,0,0"/>
+                                        <TextBlock Text="Başarıyla tamamlanan görevler"
+                                                 FontSize="12"
+                                                 Opacity="0.6"
+                                                 TextWrapping="Wrap"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+                                
+                                <!-- Tamamlanmayan Görevler -->
+                                <materialDesign:Card Grid.Column="2" 
+                                                  Background="White" 
+                                                  UniformCornerRadius="8"
+                                                  Padding="16" 
+                                                  Margin="8,0,8,0">
+                                    <StackPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <materialDesign:PackIcon Kind="Clock" 
+                                                                   Width="28" 
+                                                                   Height="28" 
+                                                                   DockPanel.Dock="Left"
+                                                                   Foreground="#FF9800"/>
+                                            <Border DockPanel.Dock="Right" 
+                                                  Background="#FFF3E0" 
+                                                  CornerRadius="20" 
+                                                  Width="40" 
+                                                  Height="40">
+                                                <TextBlock x:Name="PendingTasksTextBlock" 
+                                                         Text="0" 
+                                                         FontSize="18" 
+                                                         FontWeight="Bold" 
+                                                         Foreground="#FF9800"
+                                                         VerticalAlignment="Center"
+                                                         HorizontalAlignment="Center"/>
+                                            </Border>
+                                        </DockPanel>
+                                        <TextBlock Text="Bekleyen" 
+                                                 FontWeight="Medium"
+                                                 Margin="0,12,0,0"/>
+                                        <TextBlock Text="Henüz tamamlanmamış görevler"
+                                                 FontSize="12"
+                                                 Opacity="0.6"
+                                                 TextWrapping="Wrap"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+                                
+                                <!-- Alt Görevler -->
+                                <materialDesign:Card Grid.Column="3" 
+                                                  Background="White" 
+                                                  UniformCornerRadius="8"
+                                      Padding="16" 
+                                      Margin="8,0,0,0">
+                                    <StackPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <materialDesign:PackIcon Kind="FormatListChecks" 
+                                                                   Width="28" 
+                                                                   Height="28" 
+                                                                   DockPanel.Dock="Left"
+                                                                   Foreground="#9C27B0"/>
+                                            <Border DockPanel.Dock="Right" 
+                                                  Background="#F3E5F5" 
+                                                  CornerRadius="20" 
+                                                  Width="40" 
+                                                  Height="40">
+                                                <TextBlock x:Name="SubTasksTextBlock" 
+                                                 Text="0" 
+                                                         FontSize="18" 
+                                                 FontWeight="Bold" 
+                                                         Foreground="#9C27B0"
+                                                         VerticalAlignment="Center"
+                                                         HorizontalAlignment="Center"/>
+                                            </Border>
+                                        </DockPanel>
+                                        <TextBlock Text="Alt Görevler" 
+                                                 FontWeight="Medium"
+                                                 Margin="0,12,0,0"/>
+                                        <TextBlock Text="Toplam alt görev sayısı"
+                                                 FontSize="12"
+                                                 Opacity="0.6"
+                                                 TextWrapping="Wrap"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </materialDesign:Card>
+                            </Grid>
+                            
+                            <!-- Daire Grafiği ve Görev Listesi -->
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="1.5*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <materialDesign:Card Grid.Column="0"
+                                                  Background="White" 
+                                                  UniformCornerRadius="8"
+                                                  Margin="0,0,8,0">
+                                    <Grid Margin="16">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        
+                                        <TextBlock Text="Görev Durumu" 
+                                                 FontSize="16"
+                                                 FontWeight="Medium" 
+                                                 Foreground="#1976D2"
+                                                 Margin="0,0,0,12"/>
+                                        
+                                    <lvc:PieChart x:Name="TaskPieChart"
+                                                    Grid.Row="1"
+                                                    LegendLocation="Bottom"
+                                                    Margin="10,0"
+                                                    DataTooltip="{x:Null}"
+                                                    Hoverable="True"
+                                                    DisableAnimations="False">
+                                        <lvc:PieChart.Series>
+                                            <lvc:PieSeries Title="Tamamlanan" 
+                                                         Values="0" 
+                                                         DataLabels="True"
+                                                         LabelPoint="{Binding PointLabel}"
+                                                         Fill="#4CAF50"/>
+                                                <lvc:PieSeries Title="Bekleyen" 
+                                                         Values="0" 
+                                                         DataLabels="True"
+                                                         LabelPoint="{Binding PointLabel}"
+                                                             Fill="#FF9800"/>
+                                        </lvc:PieChart.Series>
+                                            <lvc:PieChart.ChartLegend>
+                                                <lvc:DefaultLegend BulletSize="15" 
+                                                                 FontSize="13" 
+                                                                 Margin="0,10,0,0"/>
+                                            </lvc:PieChart.ChartLegend>
+                                    </lvc:PieChart>
+                                    </Grid>
+                                </materialDesign:Card>
+                                
+                                <!-- Kullanıcının Görevleri -->
+                                <materialDesign:Card Grid.Column="1"
+                                                  Background="White" 
+                                                  UniformCornerRadius="8"
+                                                  Margin="8,0,0,0">
+                                    <Grid Margin="16">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Text="Son Görevler" 
+                                                     FontSize="16"
+                                             FontWeight="Medium" 
+                                                     Foreground="#1976D2"
+                                                     DockPanel.Dock="Left"/>
+                                            
+                                            <TextBlock x:Name="TaskListCountTextBlock"
+                                                     Text="(Son 20 görev)" 
+                                                     Opacity="0.6"
+                                                     FontSize="12"
+                                                     VerticalAlignment="Center"
+                                                     Margin="8,0,0,0"
+                                                     DockPanel.Dock="Left"/>
+                                            
+                                            <ComboBox x:Name="TaskSortingComboBox"
+                                                    Width="120"
+                                                    DockPanel.Dock="Right"
+                                                    materialDesign:HintAssist.Hint="Sıralama"
+                                                    materialDesign:TextFieldAssist.UnderlineBrush="#1976D2"
+                                                    Foreground="#1976D2"
+                                                    SelectionChanged="TaskSorting_Changed"
+                                                    Margin="0,0,0,0">
+                                                <ComboBoxItem Content="Son Değişiklik"/>
+                                                <ComboBoxItem Content="Oluşturma"/>
+                                                <ComboBoxItem Content="Alfabetik"/>
+                                            </ComboBox>
+                                        </DockPanel>
+                                    
+                                    <ListView x:Name="UserTasksListView"
+                                            Grid.Row="1"
+                                                BorderThickness="0"
+                                                Margin="0,12,0,0"
+                                                ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                            <ListView.Resources>
+                                                <Style TargetType="ListViewItem" BasedOn="{StaticResource MaterialDesignListBoxItem}">
+                                                    <Setter Property="Margin" Value="0,4"/>
+                                                    <Setter Property="Padding" Value="8,6"/>
+                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                    <Setter Property="materialDesign:ListBoxItemAssist.ShowSelection" Value="False"/>
+                                                </Style>
+                                            </ListView.Resources>
+                                            <ListView.ItemTemplate>
+                                                        <DataTemplate>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        
+                                                        <CheckBox Grid.Column="0" 
+                                                                IsChecked="{Binding IsCompleted, Mode=OneWay}"
+                                                                IsEnabled="False"
+                                                                Style="{StaticResource MaterialDesignCheckBox}" 
+                                                                Margin="0,0,12,0"/>
+                                                        
+                                                        <StackPanel Grid.Column="1">
+                                                            <TextBlock Text="{Binding Title}" 
+                                                                     FontWeight="Medium"
+                                                                     TextWrapping="NoWrap"
+                                                                     TextTrimming="CharacterEllipsis"
+                                                                     TextDecorations="{Binding IsCompleted, Converter={StaticResource BoolToStrikethrough}}"/>
+                                                            
+                                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                                <materialDesign:Chip Background="#E0E0E0" 
+                                                                                  Margin="0,0,8,0"
+                                                                                  Height="22"
+                                                                                  Padding="6,0">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <materialDesign:PackIcon Kind="Category" 
+                                                                                               Height="14" 
+                                                                                               Width="14"
+                                                                                               VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding Category, TargetNullValue='Kategorisiz'}" 
+                                                                                 FontSize="11"
+                                                                                 Margin="4,0,0,0"
+                                                                                 VerticalAlignment="Center"/>
+                                                                    </StackPanel>
+                                                                </materialDesign:Chip>
+                                                                
+                                                                <materialDesign:Chip Background="#E3F2FD" 
+                                                                                  Height="22"
+                                                                                  Padding="6,0">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <materialDesign:PackIcon Kind="Clock" 
+                                                                                               Height="14" 
+                                                                                               Width="14"
+                                                                                               VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding ModifiedDate, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" 
+                                                                                 FontSize="11"
+                                                                                 Margin="4,0,0,0"
+                                                                                 VerticalAlignment="Center"/>
+                                                                    </StackPanel>
+                                                                </materialDesign:Chip>
+                                                            </StackPanel>
+                                                        </StackPanel>
+                                                        
+                                                        <Button Grid.Column="2"
+                                                              Style="{StaticResource MaterialDesignIconButton}"
+                                                              Height="32"
+                                                              Width="32"
+                                                              ToolTip="Görevi Görüntüle"
+                                                              Command="{Binding DataContext.ViewTaskDetailsCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                              CommandParameter="{Binding}">
+                                                            <materialDesign:PackIcon Kind="EyeOutline" 
+                                                                                 Height="18" 
+                                                                                 Width="18"/>
+                                                        </Button>
+                                                    </Grid>
+                                                        </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                    </ListView>
+                                </Grid>
+                                </materialDesign:Card>
+                            </Grid>
+                        </Grid>
+                    </materialDesign:Card>
+                </Grid>
+            </Grid>
+            
+            <!-- Diğer içerik panelleri - Gizli durumdalar -->
+            <Grid x:Name="UserReportsPanel" Visibility="Collapsed">
+                <!-- Kullanıcı bazlı analiz -->
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Başlık -->
+                    <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Kullanıcı Bazlı Performans Analizi" 
+                                     FontSize="18" 
+                                     FontWeight="Bold" 
+                                     Foreground="#1976D2"
+                                     Margin="0,0,0,8"/>
+                            <TextBlock Text="Her kullanıcının görev tamamlama performansını analiz edin"
+                                     FontSize="14" 
+                                     Opacity="0.6"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+                    
+                    <!-- Kullanıcı Performans Tablosu -->
+                    <materialDesign:Card Grid.Row="1" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Filtre -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                                <ComboBox x:Name="UserPerformanceFilterComboBox"
+                                        materialDesign:HintAssist.Hint="Performans Filtresi"
+                                        Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                        Width="200"
+                                        materialDesign:TextFieldAssist.UnderlineBrush="#1976D2"
+                                        Foreground="#1976D2"
+                                        Margin="0,0,16,0">
+                                    <ComboBoxItem Content="Tüm Kullanıcılar"/>
+                                    <ComboBoxItem Content="En Yüksek Tamamlama Oranı"/>
+                                    <ComboBoxItem Content="En Düşük Tamamlama Oranı"/>
+                                    <ComboBoxItem Content="En Çok Göreve Sahip"/>
+                                    <ComboBoxItem Content="En Az Göreve Sahip"/>
+                                </ComboBox>
+                                
+                                <Button Content="Uygula"
+                                      Style="{StaticResource MaterialDesignOutlinedButton}"
+                                      BorderBrush="#1976D2"
+                                      Foreground="#1976D2"
+                                      Click="ApplyUserFilter_Click"/>
+                            </StackPanel>
+                            
+                            <!-- Kullanıcı Tablosu -->
+                            <DataGrid x:Name="UserPerformanceDataGrid"
+                                    Grid.Row="1"
+                                    AutoGenerateColumns="False"
+                                    CanUserAddRows="False"
+                                    CanUserDeleteRows="False"
+                                    IsReadOnly="True"
+                                    materialDesign:DataGridAssist.CellPadding="8"
+                                    materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Kullanıcı Adı" 
+                                                      Binding="{Binding Username}" 
+                                                      Width="*"/>
+                                    <DataGridTextColumn Header="Toplam Görev" 
+                                                      Binding="{Binding TotalTasks}" 
+                                                      Width="120"/>
+                                    <DataGridTextColumn Header="Tamamlanan" 
+                                                      Binding="{Binding CompletedTasks}" 
+                                                      Width="120"/>
+                                    <DataGridTextColumn Header="Bekleyen" 
+                                                      Binding="{Binding PendingTasks}" 
+                                                      Width="120"/>
+                                    <DataGridTemplateColumn Header="Tamamlama Oranı" 
+                                                         Width="200">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid>
+                                                    <ProgressBar Value="{Binding CompletionRate}" 
+                                                               Maximum="100" 
+                                                               Height="10" 
+                                                               Foreground="{Binding CompletionRateColor}"/>
+                                                    <TextBlock Text="{Binding CompletionRateText}" 
+                                                             HorizontalAlignment="Right"
+                                                             VerticalAlignment="Center"
+                                                             Margin="0,0,4,0"
+                                                             FontSize="12"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </materialDesign:Card>
+                </Grid>
+            </Grid>
+            
+            <Grid x:Name="CategoryReportsPanel" Visibility="Collapsed">
+                <!-- Kategori bazlı analiz -->
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Başlık -->
+                    <materialDesign:Card Grid.Row="0" Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Kategori Bazlı Görev Analizi" 
+                                     FontSize="18" 
+                                     FontWeight="Bold" 
+                                     Foreground="#1976D2"
+                                     Margin="0,0,0,8"/>
+                            <TextBlock Text="Görevlerin kategori dağılımını ve tamamlanma oranlarını analiz edin"
+                                     FontSize="14" 
+                                     Opacity="0.6"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+                    
+                    <!-- Kategori Analiz İçeriği -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Kategori Dağılımı -->
+                        <materialDesign:Card Grid.Column="0" Padding="16" Margin="0,0,8,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Text="Kategori Dağılımı" 
+                                         FontWeight="Medium" 
+                                         Foreground="#1976D2"
+                                         Margin="0,0,0,16"/>
+                                
+                                <lvc:PieChart x:Name="CategoryPieChart"
+                                            Grid.Row="1"
+                                            LegendLocation="Bottom"
+                                            Margin="10">
+                                    <lvc:PieChart.Series>
+                                        <lvc:PieSeries Title="İş" 
+                                                     Values="25" 
+                                                     DataLabels="True"
+                                                     Fill="#2196F3"/>
+                                        <lvc:PieSeries Title="Kişisel" 
+                                                     Values="30" 
+                                                     DataLabels="True"
+                                                     Fill="#4CAF50"/>
+                                        <lvc:PieSeries Title="Alışveriş" 
+                                                     Values="15" 
+                                                     DataLabels="True"
+                                                     Fill="#FFC107"/>
+                                        <lvc:PieSeries Title="Eğitim" 
+                                                     Values="20" 
+                                                     DataLabels="True"
+                                                     Fill="#9C27B0"/>
+                                        <lvc:PieSeries Title="Diğer" 
+                                                     Values="10" 
+                                                     DataLabels="True"
+                                                     Fill="#FF5722"/>
+                                    </lvc:PieChart.Series>
+                                </lvc:PieChart>
+                            </Grid>
+                        </materialDesign:Card>
+                        
+                        <!-- Kategori Tamamlanma Oranları -->
+                        <materialDesign:Card Grid.Column="1" Padding="16" Margin="8,0,0,0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Text="Kategori Tamamlanma Oranları" 
+                                         FontWeight="Medium" 
+                                         Foreground="#1976D2"
+                                         Margin="0,0,0,16"/>
+                                
+                                <lvc:CartesianChart x:Name="CategoryCompletionChart"
+                                                  Grid.Row="1">
+                                    <lvc:CartesianChart.AxisX>
+                                        <lvc:Axis Title="Kategoriler" 
+                                                Labels="İş,Kişisel,Alışveriş,Eğitim,Diğer"/>
+                                    </lvc:CartesianChart.AxisX>
+                                    <lvc:CartesianChart.AxisY>
+                                        <lvc:Axis Title="Tamamlanma Oranı (%)" 
+                                                MinValue="0" 
+                                                MaxValue="100"/>
+                                    </lvc:CartesianChart.AxisY>
+                                    <lvc:CartesianChart.Series>
+                                        <lvc:ColumnSeries Title="Tamamlanma Oranı"
+                                                        Values="80,65,45,90,50"
+                                                        Fill="#2196F3"/>
+                                    </lvc:CartesianChart.Series>
+                                </lvc:CartesianChart>
+                            </Grid>
+                        </materialDesign:Card>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window> 
